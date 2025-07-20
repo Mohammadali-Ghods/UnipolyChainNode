@@ -2,7 +2,6 @@
   "Init": {
     "ChainSpecPath": "chainspec/foundation.json",
     "Network": "UNP Chain",
-    "DiscoveryEnabled": false,
     "Mining": true,
     "WebSocketsEnabled": true
   },
@@ -18,12 +17,14 @@
   },
   "Network": {
     "P2PPort": 30303,
-    "MaxActivePeers": 20
+    "DiscoveryPort": 30303,
+    "MaxActivePeers": 25
   },
   "JsonRpc": {
     "Enabled": true,
     "Host": "127.0.0.1",
     "Port": 8545,
+    "EnginePort": 8551,
     "EnabledModules": [ "Eth", "Net", "Web3", "Personal", "TxPool", "Subscribe" ]
   },
   "Sync": {

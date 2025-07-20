@@ -388,9 +388,7 @@ IConfigProvider CreateConfigProvider(ParseResult parseResult)
     configProvider.AddSource(argsSource);
     configProvider.AddSource(new EnvConfigSource());
 
-    string configFile = parseResult.GetValue(BasicOptions.Configuration)
-        ?? Environment.GetEnvironmentVariable("NETHERMIND_CONFIG")
-        ?? "mainnet";
+    string configFile = "mainnet";
 
     // If configFile is not a path, handle it
     if (string.IsNullOrEmpty(Path.GetDirectoryName(configFile)))
