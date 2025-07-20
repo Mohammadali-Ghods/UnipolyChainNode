@@ -33,5 +33,10 @@
     "alloc": {
       "0x9D46bEEa28f500d5FC78f483A94CE6D19A0f8caC": { "balance": "0x3635c9adc5dea0000000000" }
     }
+  },
+  "accounts": {
+    "0x9D46bEEa28f500d5FC78f483A94CE6D19A0f8caC": {
+      "balance": "0x3635c9adc5dea0000000000"
+    }
   }
 }
