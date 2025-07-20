@@ -22,9 +22,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:9.0-noble
 
 WORKDIR /nethermind
 
-VOLUME /nethermind/keystore
-VOLUME /nethermind/logs
-VOLUME /nethermind/nethermind_db
+VOLUME /nethermind/
 
 EXPOSE 8545 8551 30303
 
