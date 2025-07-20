@@ -13,7 +13,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Nethermind.Core.Test\Nethermind.Core.Test.csproj" />
     <ProjectReference Include="..\Nethermind.Network\Nethermind.Network.csproj" />
-    <ProjectReference Include="..\Nethermind.Network.Test\Nethermind.Network.Test.csproj" />
   </ItemGroup>
 
 </Project>
