@@ -31,6 +31,10 @@ namespace Nethermind.Blockchain
         public Block Load()
         {
             Block genesis = _chainSpec.Genesis;
+            _chainSpec.NetworkId = 47382915;
+            _chainSpec.ChainId = 47382915;
+            _chainSpec.Name = "UNPChain";
+
             Preallocate(genesis);
 
             // we no longer need the allocations - 0.5MB RAM, 9000 objects for mainnet

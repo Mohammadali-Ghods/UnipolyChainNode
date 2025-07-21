@@ -1,0 +1,42 @@
+{
+  "name": "UNP Chain",
+  "chainId": 47382915,
+  "networkId": 47382915,
+  "engine": {
+    "clique": {
+      "period": 2,
+      "epoch": 30000
+    }
+  },
+  "params": {
+    "eip150Block": 0,
+    "eip155Block": 0,
+    "eip158Block": 0,
+    "byzantiumBlock": 0,
+    "constantinopleBlock": 0,
+    "petersburgBlock": 0,
+    "istanbulBlock": 0,
+    "berlinBlock": 0,
+    "londonBlock": 0,
+    "mergeNetsplitBlock": 0,
+    "parisBlock": 0,
+    "shanghaiBlock": 0
+  },
+  "genesis": {
+    "nonce": "0x0000000000000042",
+    "timestamp": "0x0",
+    "extraData": "0x0000000000000000000000000000000000000000000000000000000000000000a88f3e2571792847dc9e605d8a8ff3db4f134333070ac6ad219db6cb18dff57a847fff3123c92198f600b7e0f98ecda33d3fc1348af1f0172ef27cebc8c75aebede5ab29a14fc8bc98d880fe20b23a11083f0b557a00cd5c3ee28fc70a8450fbdf4abc4c39b66ad31ececbedb3cedd0d5233efa74f93e1d465a387e2286da1030bee99e1fb4823bc60e1707f178cbf767837111dd3d251efa19e102c3e259ad9d4abbba0a3fb8c89ad0284ea82c8a3f51b39136c377097d69917f72a9c3a179c423e0af022fdb0a30000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "gasLimit": "0x2FAF080",
+    "difficulty": "0x1",
+    "mixHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "author": "0x0000000000000000000000000000000000000000",
+    "alloc": {
+      "0x9D46bEEa28f500d5FC78f483A94CE6D19A0f8caC": { "balance": "0x3635c9adc5dea0000000000" }
+    }
+  },
+  "accounts": {
+    "0x9D46bEEa28f500d5FC78f483A94CE6D19A0f8caC": {
+      "balance": "0x3635c9adc5dea0000000000"
+    }
+  }
+}
