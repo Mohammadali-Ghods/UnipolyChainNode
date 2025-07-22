@@ -196,6 +196,7 @@ public class InitializeNetwork : IStep
             throw new InvalidOperationException("Cannot initialize network without knowing own enode");
         }
 
+        
         ProductInfo.InitializePublicClientId(_networkConfig.PublicClientIdFormat);
 
         ThisNodeInfo.AddInfo("Ethereum     :", $"tcp://{_api.Enode.HostIp}:{_api.Enode.Port}");
