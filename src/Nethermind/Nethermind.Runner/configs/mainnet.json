@@ -9,6 +9,9 @@
     "LogFileName": "clique.log",
     "StaticNodesPath": "Data/static-nodes.json"
   },
+  "Blocks": {
+    "MinGasPrice": 0
+  },
   "Logging": {
     "ConsoleLogLevels": {
       "Default": "Trace"
