@@ -8,6 +8,7 @@
 <p align="center">
   <a href="https://rpc.unpchain.com">RPC</a> ·
   <a href="https://explorer.unpchain.com">Explorer</a> ·
+  <a href="https://block.unpchain.com">Validator dashboard</a> ·
   <b>Chain&nbsp;ID 47382916</b>
 </p>
 
@@ -139,10 +140,11 @@ depending on your bandwidth and disk.
 
 ## Public endpoints
 
-| Purpose        | URL                             |
-|----------------|---------------------------------|
-| JSON‑RPC (HTTP)| `https://rpc.unpchain.com`      |
-| Block explorer | `https://explorer.unpchain.com` |
+| Purpose             | URL                             |
+|---------------------|---------------------------------|
+| JSON‑RPC (HTTP)     | `https://rpc.unpchain.com`      |
+| Block explorer      | `https://explorer.unpchain.com` |
+| Validator dashboard | `https://block.unpchain.com`    |
 
 These are provided for convenience. Once your own node is synced you can (and should) use
 your local `http://localhost:8545` instead of the public endpoint.
@@ -205,6 +207,13 @@ produces.
 > consensus** and can be read at any moment with `clique_getSigners` (see
 > [verification](#independently-verify-the-chain-genesis--validators)); the table below must
 > always match that on‑chain result.
+
+> 📊 **Live validator dashboard: [`https://block.unpchain.com`](https://block.unpchain.com)**
+> A public, real‑time view of the validator set: who is producing blocks, whose turn is next in
+> the round‑robin, per‑validator block share, and a 24‑hour history of every block (proposer,
+> whether it carried transactions, and in‑turn/out‑of‑turn seal). Every figure is recomputed from
+> the public RPC and `clique_getSigners`/`clique_getBlockSigner`, so it can be independently
+> reproduced — no trust required.
 
 | #  | Validator          | Signer address (on‑chain identity)             | RPC endpoint                | Status     |
 |----|--------------------|------------------------------------------------|-----------------------------|------------|
