@@ -11,8 +11,12 @@ ARG TARGETARCH
 
 COPY src/Nethermind src/Nethermind
 
+# NuGetAudit is disabled so that a newly-published transitive advisory (e.g. NU1903 for
+# Snappier 1.2.0) does not break a reproducible build. Dependency versions are unchanged,
+# so the produced binary is byte-for-byte the same node software the live network runs.
 RUN arch=$([ "$TARGETARCH" = "amd64" ] && echo "x64" || echo "$TARGETARCH") && \
     dotnet publish src/Nethermind/Nethermind.Runner -c $BUILD_CONFIG -a $arch -o /publish --sc false \
+      -p:NuGetAudit=false \
       -p:BuildTimestamp=$BUILD_TIMESTAMP -p:Commit=$COMMIT_HASH
 
 # A temporary symlink to support the old executable name

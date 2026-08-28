@@ -1,0 +1,5 @@
+# UnipolyChain (UNPChain) — public bootnode(s)
+# Anyone may use these enodes to peer with the network. No approval / whitelisting required.
+# Format: enode://<node-id>@<host>:<port>
+
+enode://1e9863365795ea0cb16f4c524694a28e37a9b35a411965bb152a62c63735e6531af7cca65e3c8faeb6049a94535ba9516df2616411142e0d5143de001f075705@167.86.100.150:30304
