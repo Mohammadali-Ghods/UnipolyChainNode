@@ -1,0 +1,35 @@
+# Dependencies / build output
+node_modules/
+dist/
+build/
+.next/
+out/
+vendor/
+__pycache__/
+.venv/
+venv/
+*.egg-info/
+target/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Secrets — NEVER commit these
+.env
+.env.*
+*.pem
+*.key
+*.keystore
+*.p12
+*.mobileprovision
+secrets/
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+*.tmp
+.idea/
+.vscode/
