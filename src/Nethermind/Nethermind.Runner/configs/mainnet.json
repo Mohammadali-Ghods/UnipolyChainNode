@@ -1,0 +1,55 @@
+{
+  "Init": {
+    "WebSocketsEnabled": true,
+    "StoreReceipts": true,
+    "EnableUnsecuredDevWallet": true,
+    "IsMining": true,
+    "ChainSpecPath": "chainspec/foundation.json",
+    "BaseDbPath": "nethermind_db/clique",
+    "LogFileName": "clique.log",
+    "StaticNodesPath": "Data/static-nodes.json"
+  },
+  "Blocks": {
+    "MinGasPrice": 0
+  },
+  "Logging": {
+    "ConsoleLogLevels": {
+      "Default": "Trace"
+    },
+    "FileLogLevels": {
+      "Default": "Information"
+    },
+    "File": {
+      "Enabled": false,
+      "Path": "nethermind.log"
+    }
+  },
+  "Network": {
+    "DiscoveryPort": 30303,
+    "P2PPort": 30303,
+    "LocalIp": "0.0.0.0",
+    "ExternalIp": "0.0.0.0"
+  },
+  "JsonRpc": {
+    "Enabled": true,
+    "Http": {
+      "Enabled": true,
+      "Host": "0.0.0.0",
+      "Port": 8545
+    },
+    "EnabledModules": [
+      "Eth",
+      "Net",
+      "Web3",
+      "Personal",
+      "TxPool",
+      "Subscribe"
+    ]
+  },
+  "KeyStoreConfig": {
+    "TestNodeKey": "46547781c3eeb7e543f8da68d9d9a2d1bea47abf97b2a24b2b020e44e09f529d"
+  },
+  "Merge": {
+    "Enabled": false
+  }
+}
