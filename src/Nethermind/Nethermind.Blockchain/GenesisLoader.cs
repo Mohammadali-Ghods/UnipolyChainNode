@@ -31,8 +31,8 @@ namespace Nethermind.Blockchain
         public Block Load()
         {
             Block genesis = _chainSpec.Genesis;
-            _chainSpec.NetworkId = 47382915;
-            _chainSpec.ChainId = 47382915;
+            _chainSpec.NetworkId = 47382916;
+            _chainSpec.ChainId = 47382916;
             _chainSpec.Name = "UNPChain";
 
             Preallocate(genesis);

@@ -43,11 +43,9 @@
       "Web3",
       "Personal",
       "TxPool",
-      "Subscribe"
+      "Subscribe",
+      "Clique"
     ]
-  },
-  "KeyStoreConfig": {
-    "TestNodeKey": "46547781c3eeb7e543f8da68d9d9a2d1bea47abf97b2a24b2b020e44e09f529d"
   },
   "Merge": {
     "Enabled": false
