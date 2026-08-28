@@ -22,6 +22,7 @@
 - [Public endpoints](#public-endpoints)
 - [Bootnodes](#bootnodes)
 - [Add UnipolyChain to a wallet (MetaMask)](#add-unipolychain-to-a-wallet-metamask)
+- [Validators](#validators)
 - [Independently verify the chain (genesis & validators)](#independently-verify-the-chain-genesis--validators)
 - [Ports & firewall](#ports--firewall)
 - [Build from source](#build-from-source)
@@ -172,6 +173,55 @@ Add a custom network with:
 - **Chain ID:** `47382916`
 - **Currency symbol:** `UNP`
 - **Block explorer URL:** `https://explorer.unpchain.com`
+
+---
+
+## Validators
+
+UnipolyChain is secured by a set of independent **Clique (Proof‑of‑Authority) validators**.
+Each validator runs its own Nethermind node and takes turns sealing blocks. A validator's
+public, on‑chain identity is its **signer address** — the address that signs the blocks it
+produces.
+
+> **The RPC endpoint for the whole network is `https://rpc.unpchain.com`.**
+> Every validator secures this one chain, so this single public RPC is how you reach — and
+> independently verify — all of them. The authoritative validator list is stored **in
+> consensus** and can be read at any moment with `clique_getSigners` (see
+> [verification](#independently-verify-the-chain-genesis--validators)); the table below must
+> always match that on‑chain result.
+
+| #  | Validator          | Signer address (on‑chain identity)             | RPC endpoint                | Status     |
+|----|--------------------|------------------------------------------------|-----------------------------|------------|
+| 0  | Main Signer        | `0xf600b7e0f98ecda33d3fc1348af1f0172ef27ceb`   | `https://rpc.unpchain.com`  | ✅ active  |
+| 1  | Validator 01       | `0x65f28ff7608b24f441efb830ddcc9007c3662ad0`   | `https://rpc.unpchain.com`  | ✅ active  |
+| 2  | Validator 02       | `0x74627432c23e4e62757a21b30ffe5a2e231df851`   | `https://rpc.unpchain.com`  | ✅ active  |
+| 3  | Validator 03       | `0x29db2863d506d1ab18a2f113e6d6855bdec6eb23`   | `https://rpc.unpchain.com`  | ✅ active  |
+| 4  | Validator 04       | `0x8abe7701cde31ce03f1daf40524858983846bd72`   | `https://rpc.unpchain.com`  | ✅ active  |
+| 5  | Validator 05       | `0x9b3829e9579fb66f02762c9e27b254cded1df13d`   | `https://rpc.unpchain.com`  | ✅ active  |
+| 6  | Validator 06       | `0x39960c8fc6a6157d806deb6110b90e4657a58fbc`   | `https://rpc.unpchain.com`  | ✅ active  |
+| 7  | Validator 07       | `0x04088960128d85a5c32ebfa58c3eefe65237ba9d`   | `https://rpc.unpchain.com`  | ✅ active  |
+| 8  | Validator 08       | `0xc34a6f695b6e824d1009d7587b7ba4ea730db79e`   | `https://rpc.unpchain.com`  | ✅ active  |
+| 9  | Validator 10       | `0x9517e10cef403af64ff33603f41fe952d698f3fb`   | `https://rpc.unpchain.com`  | ✅ active  |
+
+Confirm this exact set yourself — it is read straight from consensus, so it cannot be faked:
+
+```bash
+curl -s -X POST https://rpc.unpchain.com -H 'Content-Type: application/json' \
+  --data '{"jsonrpc":"2.0","method":"clique_getSigners","params":[],"id":1}'
+```
+
+**Notes**
+
+- The validator set is **live‑verifiable at all times**; if it changes, `clique_getSigners`
+  reflects it immediately. Always treat the on‑chain result as the source of truth.
+- The authority set is being expanded across independent operators; new validators join through
+  the standard Clique governance call (`clique_propose`) by the existing authorities. Running a
+  node is separate and open to everyone today — see
+  [Run a node in one command](#run-a-node-in-one-command).
+- For security (DoS protection of block‑producing nodes), each validator's **own** JSON‑RPC port
+  is kept private/firewalled. Public interaction and verification go through the shared network
+  RPC `https://rpc.unpchain.com`; anyone who wants a local endpoint can simply
+  [run their own node](#run-a-node-in-one-command) and use `http://localhost:8545`.
 
 ---
 
