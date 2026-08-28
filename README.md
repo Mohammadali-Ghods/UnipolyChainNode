@@ -162,6 +162,22 @@ enode://1e9863365795ea0cb16f4c524694a28e37a9b35a411965bb152a62c63735e6531af7cca6
 The provided Compose file and launcher already wire this in via `--Network.StaticPeers`, so
 you don't need to configure anything by hand.
 
+### Confirm the network is open (no whitelist)
+
+The bootnode's devp2p port `30304` (TCP **and** UDP) is reachable from **any IP on the public
+internet** — there is no allowlist, no approval, and no whitelisting step. You can verify this
+yourself before you build anything:
+
+```bash
+# TCP reachability to the public bootnode (expect: open / succeeded)
+nc -vz 167.86.100.150 30304
+```
+
+Prefer an independent, off‑your‑machine check? Use any hosted TCP prober, e.g.
+`https://check-host.net/check-tcp?host=167.86.100.150:30304` — probes from multiple countries
+all report the port **open**. Once your node is up it will also discover further peers on its
+own via discovery.
+
 ---
 
 ## Add UnipolyChain to a wallet (MetaMask)
