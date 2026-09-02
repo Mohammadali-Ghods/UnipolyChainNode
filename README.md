@@ -27,6 +27,7 @@
 - [Independently verify the chain (genesis & validators)](#independently-verify-the-chain-genesis--validators)
 - [Ports & firewall](#ports--firewall)
 - [Build from source](#build-from-source)
+  - [Build & run on Ubuntu without Docker](#build--run-on-ubuntu-without-docker-compile-from-source-run-the-binary-in-a-shell)
 - [Advanced: use the config file directly](#advanced-use-the-config-file-directly)
 - [Decentralization status & roadmap](#decentralization-status--roadmap)
 - [Troubleshooting / FAQ](#troubleshooting--faq)
@@ -326,6 +327,105 @@ This produces the `nethermind` node binary with UnipolyChain's chain configurati
 [`src/Nethermind`](src/Nethermind); the chain spec is
 [`src/Nethermind/Nethermind.Runner/chainspec/foundation.json`](src/Nethermind/Nethermind.Runner/chainspec/foundation.json).
 
+### Build & run on Ubuntu without Docker (compile from source, run the binary in a shell)
+
+**Docker is optional.** The node is a standard **.NET 9** application; the Dockerfile just wraps
+`dotnet publish`. If your environment only allows *building from source and running a binary in a
+shell*, do exactly this — no Docker, no container runtime:
+
+**1. Install the .NET 9 SDK** (the build toolchain — it also ships the runtime that runs the node):
+
+```bash
+# Microsoft's official install script — no root / package manager required:
+curl -sSL https://dot.net/v1/dotnet-install.sh -o dotnet-install.sh
+chmod +x dotnet-install.sh
+./dotnet-install.sh --channel 9.0            # installs to ~/.dotnet
+export DOTNET_ROOT="$HOME/.dotnet"
+export PATH="$PATH:$HOME/.dotnet"
+dotnet --version                              # expect 9.0.x
+```
+
+> Where it is packaged you can instead use `sudo apt-get update && sudo apt-get install -y dotnet-sdk-9.0`.
+
+**2. Get the pinned source:**
+
+```bash
+git clone https://github.com/Mohammadali-Ghods/UnipolyChainNode.git
+cd UnipolyChainNode
+git checkout v1.0.0            # UnipolyChain's pinned client (or stay on `main` for latest)
+```
+
+**3. Build (publish) the node** — this is the *same* command the Dockerfile runs, without Docker:
+
+```bash
+dotnet publish src/Nethermind/Nethermind.Runner \
+  -c Release -o "$HOME/unpchain-node" --sc false -p:NuGetAudit=false
+```
+
+It writes a ready‑to‑run folder to `~/unpchain-node` containing the `nethermind` executable plus
+the bundled `configs/`, `chainspec/foundation.json` and `Data/` (UNPChain genesis, networkId
+`47382916`). `--sc false` is framework‑dependent (uses the .NET 9 runtime installed in step 1).
+Want a **fully standalone** binary that needs no runtime on the run host? Use `--sc true -r linux-x64`
+instead (larger output). Compiling the full solution takes several minutes the first time (it
+also ReadyToRun‑precompiles the assemblies).
+
+**4. Run the binary in your shell** (public, non‑mining node):
+
+```bash
+cd "$HOME/unpchain-node"
+./nethermind --config mainnet \
+  --Init.IsMining false \
+  --Init.EnableUnsecuredDevWallet false \
+  --Network.StaticPeers "enode://1e9863365795ea0cb16f4c524694a28e37a9b35a411965bb152a62c63735e6531af7cca65e3c8faeb6049a94535ba9516df2616411142e0d5143de001f075705@167.86.100.150:30304" \
+  --JsonRpc.Enabled true --JsonRpc.Host 0.0.0.0 --JsonRpc.Port 8545 \
+  --JsonRpc.EnabledModules "Eth,Net,Web3,Subscribe,TxPool,Clique,Health"
+```
+
+`./nethermind` is a native launcher; `dotnet nethermind.dll --config mainnet …` is equivalent.
+`--config mainnet` loads the bundled `configs/mainnet.json`, which points at
+`chainspec/foundation.json` (UNPChain genesis / networkId `47382916`). The database is written
+under the working directory (`nethermind_db/…`) and persists across restarts — **no resync
+needed** if you keep it. Keep it alive with `systemd`, `tmux` or `nohup`, then confirm with the
+[sync checks](#verify-your-node-is-syncing) (`eth_chainId` must return `0x2d30184`).
+
+> **Switching from a different/stock client?** If a database directory was previously written by a
+> **stock NethermindEth** binary (any `1.3x` release) or any other client, point this node at a
+> **fresh, empty `BaseDbPath`** rather than reusing that database — mixing databases across
+> different clients can leave it in an inconsistent state. A clean full sync from block `0` is
+> cheap here: UNPChain blocks are near‑empty, so a fresh node reaches the chain head in only a
+> few minutes (independently reproducible — see the sync checks). After that first sync the
+> database persists and no further resync is needed.
+
+**Run as a background service (survives logout/reboot)** — a minimal `systemd` unit:
+
+```ini
+# /etc/systemd/system/unpchain-node.service
+[Unit]
+Description=UnipolyChain full node
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/unpchain-node
+Environment=DOTNET_ROOT=%h/.dotnet
+ExecStart=%h/unpchain-node/nethermind --config mainnet \
+  --Init.IsMining false --Init.EnableUnsecuredDevWallet false \
+  --Network.StaticPeers "enode://1e9863365795ea0cb16f4c524694a28e37a9b35a411965bb152a62c63735e6531af7cca65e3c8faeb6049a94535ba9516df2616411142e0d5143de001f075705@167.86.100.150:30304" \
+  --JsonRpc.Enabled true --JsonRpc.Host 0.0.0.0 --JsonRpc.Port 8545 \
+  --JsonRpc.EnabledModules "Eth,Net,Web3,Subscribe,TxPool,Clique,Health"
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+systemctl daemon-reload && systemctl enable --now unpchain-node
+journalctl -u unpchain-node -f      # follow the sync
+```
+
 ---
 
 ## Advanced: use the config file directly
@@ -356,6 +456,23 @@ cd node
 ---
 
 ## Troubleshooting / FAQ
+
+**Does joining require Docker? Can I build from source and run the binary directly in a shell (e.g. plain Ubuntu, no container runtime)?**
+No Docker required. Docker is only a convenience wrapper around `dotnet publish`. Install the
+**.NET 9 SDK**, then:
+
+```bash
+git clone https://github.com/Mohammadali-Ghods/UnipolyChainNode.git
+cd UnipolyChainNode && git checkout v1.0.0
+dotnet publish src/Nethermind/Nethermind.Runner -c Release -o "$HOME/unpchain-node" --sc false -p:NuGetAudit=false
+cd "$HOME/unpchain-node" && ./nethermind --config mainnet --Init.IsMining false --Init.EnableUnsecuredDevWallet false \
+  --Network.StaticPeers "enode://1e9863365795ea0cb16f4c524694a28e37a9b35a411965bb152a62c63735e6531af7cca65e3c8faeb6049a94535ba9516df2616411142e0d5143de001f075705@167.86.100.150:30304"
+```
+
+Full step‑by‑step (SDK install, self‑contained option, RPC flags) is in
+[Build & run on Ubuntu without Docker](#build--run-on-ubuntu-without-docker-compile-from-source-run-the-binary-in-a-shell).
+Build **this** repo (tag `v1.0.0`) — never a stock NethermindEth release binary; only this repo
+carries the chain spec / genesis / networkId `47382916`.
 
 **My node is stuck at a height just below a multiple of 30000 (e.g. `2009999`) — the next block never imports (`InvalidExtraData` / "extra data too long").**
 This is the single most common issue and it has a one‑line fix. Every `epoch` block (every
