@@ -299,11 +299,25 @@ just not accept incoming connections.
 
 ## Build from source
 
-The one‑command flow above already builds from source. To build the image manually:
+> **Which client / which tag do I build?** Build **this repository** — do **not** download a
+> stock [NethermindEth](https://github.com/NethermindEth/nethermind) release binary. UnipolyChain
+> runs a client that is derived from the Nethermind `1.32.0` codebase but carries this chain's
+> genesis, `networkId` (`47382916`) and Clique parameters compiled in; a stock upstream binary of
+> **any** version (`1.39.x` included) does **not** carry them and will fail the P2P handshake
+> (`0` peers). The version to pin is **UnipolyChain's own release tag in this repo**, not a
+> NethermindEth tag.
+>
+> **Pinned release:** [`v1.0.0`](https://github.com/Mohammadali-Ghods/UnipolyChainNode/releases/tag/v1.0.0)
+> (based on Nethermind `1.32.0`). `main` always points at the latest good release, so building
+> `main` is equally fine; pin the tag if you want a reproducible, immutable reference.
+
+The one‑command flow above already builds from source. To build the image manually from the
+pinned release:
 
 ```bash
 git clone https://github.com/Mohammadali-Ghods/UnipolyChainNode.git
 cd UnipolyChainNode
+git checkout v1.0.0          # UnipolyChain's pinned client (or stay on `main` for latest)
 docker build -t unpchainnode:latest .
 ```
 
@@ -371,17 +385,27 @@ curl -s -X POST https://rpc.unpchain.com -H 'Content-Type: application/json' \
 # block 2010000 — note its 297-byte extraData (the full signer list)
 ```
 
-**I switched to a different / newer Nethermind release (e.g. a stock `1.39.x` binary) and now it can't find peers (`0` peers, best block `0`).**
-Run the client **from this repository**, not a stock upstream Nethermind build. The live
-network runs the pinned client in this repo (Nethermind `1.32.0`) with UnipolyChain's chain
-spec, genesis, and `networkId` (`47382916`) compiled in. A generic upstream binary does not
-carry this chain's configuration, so during the devp2p handshake it presents a different
-genesis / networkId and **our nodes reject the connection** — you get `0` peers and stay at
-block `0`. The fix is to build and run from here (`docker compose up -d --build`); it wires in
-the correct chain spec and the public bootnode automatically. If you truly need a newer client
-version, you must port this repo's chain spec (`node/chainspec.json` / the values in
-[Network parameters](#network-parameters)) into it — matching `networkId`, genesis hash, and
-`maximumExtraDataSize: 0x400` — otherwise it will not peer with the network.
+**I downloaded a stock NethermindEth release (e.g. the `1.39.3` binary) and now it can't find peers (`0` peers, best block `0`). Which tag should I build instead?**
+Do **not** use a NethermindEth upstream release binary — build **this repository**, and pin
+UnipolyChain's own tag [`v1.0.0`](https://github.com/Mohammadali-Ghods/UnipolyChainNode/releases/tag/v1.0.0)
+(or just build `main`). The live network runs the client in this repo (derived from Nethermind
+`1.32.0`) with UnipolyChain's chain spec, genesis, and `networkId` (`47382916`) compiled in.
+A generic upstream binary of any version does **not** carry this chain's configuration, so during
+the devp2p handshake it presents a different genesis / networkId and **our nodes reject the
+connection** — you get `0` peers and stay at block `0`. The fix:
+
+```bash
+git clone https://github.com/Mohammadali-Ghods/UnipolyChainNode.git
+cd UnipolyChainNode
+git checkout v1.0.0            # or stay on main
+cd node
+docker compose up -d --build   # wires in the correct chain spec + public bootnode
+```
+
+(If you insist on a newer upstream client, you must port this repo's chain spec —
+`node/chainspec.json` and the values in [Network parameters](#network-parameters) — into it,
+matching `networkId`, genesis hash and `maximumExtraDataSize: 0x400`; otherwise it will not peer.
+The supported, tested path is to build this repo.)
 
 **`net_peerCount` stays at `0`.**
 Make sure you built from this repo (not a third‑party or upstream image). Confirm `eth_chainId`
