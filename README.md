@@ -343,9 +343,51 @@ cd node
 
 ## Troubleshooting / FAQ
 
+**My node is stuck at a height just below a multiple of 30000 (e.g. `2009999`) — the next block never imports (`InvalidExtraData` / "extra data too long").**
+This is the single most common issue and it has a one‑line fix. Every `epoch` block (every
+30000 blocks: 30000, 60000, … `2010000`, …) is a **Clique checkpoint block** whose header
+`extraData` embeds the *entire* validator list (`32` vanity bytes + `20 × N` signer addresses
++ `65` seal bytes). With `N = 10` validators that checkpoint header is **297 bytes**. Older
+copies of this chain spec capped `maximumExtraDataSize` at `256` (`0x100`), so the node
+**rejected the valid checkpoint block** and halted at the block right before it (`2009999`).
+The fix is already in this repository — `maximumExtraDataSize` is now `0x400` (1024 bytes,
+room for ~46 validators). **Update and restart — you do NOT need to resync from genesis:**
+
+```bash
+cd UnipolyChainNode
+git pull                       # get the fixed chain spec
+cd node
+docker compose up -d --build   # rebuild the node; the unpchain-data volume is preserved
+docker compose logs -f         # you should see it import 2010000 and keep going
+```
+
+Your node resumes from `2009999`, re‑validates block `2010000` under the corrected rule,
+accepts it, and continues. (Only delete the `unpchain-data` volume if you *want* a clean
+resync — it is not required here.) You can confirm the checkpoint is valid on the live chain:
+
+```bash
+curl -s -X POST https://rpc.unpchain.com -H 'Content-Type: application/json' \
+  --data '{"jsonrpc":"2.0","method":"eth_getBlockByNumber","params":["0x1EAB90",false],"id":1}'
+# block 2010000 — note its 297-byte extraData (the full signer list)
+```
+
+**I switched to a different / newer Nethermind release (e.g. a stock `1.39.x` binary) and now it can't find peers (`0` peers, best block `0`).**
+Run the client **from this repository**, not a stock upstream Nethermind build. The live
+network runs the pinned client in this repo (Nethermind `1.32.0`) with UnipolyChain's chain
+spec, genesis, and `networkId` (`47382916`) compiled in. A generic upstream binary does not
+carry this chain's configuration, so during the devp2p handshake it presents a different
+genesis / networkId and **our nodes reject the connection** — you get `0` peers and stay at
+block `0`. The fix is to build and run from here (`docker compose up -d --build`); it wires in
+the correct chain spec and the public bootnode automatically. If you truly need a newer client
+version, you must port this repo's chain spec (`node/chainspec.json` / the values in
+[Network parameters](#network-parameters)) into it — matching `networkId`, genesis hash, and
+`maximumExtraDataSize: 0x400` — otherwise it will not peer with the network.
+
 **`net_peerCount` stays at `0`.**
-Make sure you built from this repo (not a third‑party image). Confirm `eth_chainId` returns
-`0x2d30184`. Check outbound access to the bootnode: `nc -vz 167.86.100.150 30304`.
+Make sure you built from this repo (not a third‑party or upstream image). Confirm `eth_chainId`
+returns `0x2d30184`. Check outbound access to the bootnode: `nc -vz 167.86.100.150 30304`
+(it is open to the whole internet — no whitelist). If you changed client versions, see the two
+entries above.
 
 **`eth_chainId` returns something other than `0x2d30184`.**
 You are running an incompatible client/spec. Rebuild from this repository.
