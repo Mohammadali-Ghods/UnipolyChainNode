@@ -52,7 +52,9 @@
       }
     }
   },
-  "nodes": [],
+  "nodes": [
+    "enode://1e9863365795ea0cb16f4c524694a28e37a9b35a411965bb152a62c63735e6531af7cca65e3c8faeb6049a94535ba9516df2616411142e0d5143de001f075705@167.86.100.150:30304"
+  ],
   "accounts": {
     "0x9D46bEEa28f500d5FC78f483A94CE6D19A0f8caC": {
       "balance": "0x3635c9adc5dea0000000000"

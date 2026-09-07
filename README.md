@@ -474,6 +474,26 @@ Full step‑by‑step (SDK install, self‑contained option, RPC flags) is in
 Build **this** repo (tag `v1.0.0`) — never a stock NethermindEth release binary; only this repo
 carries the chain spec / genesis / networkId `47382916`.
 
+**I built the correct client from this repo (tag `v1.0.0`/`v1.0.1`) but it just prints `Waiting for peers...` and stays at `0` peers / block `0`.**
+This means the node was started without a peer to bootstrap from. UnipolyChain seeds peers
+from the bundled bootnode in [`Data/static-nodes.json`](src/Nethermind/Nethermind.Runner/Data/static-nodes.json)
+(loaded automatically by `--config mainnet`). Two things to check:
+
+1. **Use tag `v1.0.1` or newer** (or `main`). Earlier builds shipped an *empty*
+   `Data/static-nodes.json`, so a plain `--config mainnet` node had no peer to dial and no
+   discovery seed — it sat at `0` peers forever. `v1.0.1` bakes the public bootnode into both
+   `Data/static-nodes.json` and the chain spec `nodes`, so the node connects automatically.
+2. If you run a **custom config file** (e.g. your own `mainnet.json`) or a self-contained
+   `--sc true` binary run from a different directory, always pass the bootnode explicitly:
+
+   ```bash
+   ./nethermind --config mainnet --Init.IsMining false --Init.EnableUnsecuredDevWallet false \
+     --Network.StaticPeers "enode://1e9863365795ea0cb16f4c524694a28e37a9b35a411965bb152a62c63735e6531af7cca65e3c8faeb6049a94535ba9516df2616411142e0d5143de001f075705@167.86.100.150:30304"
+   ```
+
+   Confirm the seed was loaded — the startup log must contain `Loaded 1 static nodes from file`
+   and `net_peerCount` should become `> 0` within ~30s.
+
 **My node is stuck at a height just below a multiple of 30000 (e.g. `2009999`) — the next block never imports (`InvalidExtraData` / "extra data too long").**
 This is the single most common issue and it has a one‑line fix. Every `epoch` block (every
 30000 blocks: 30000, 60000, … `2010000`, …) is a **Clique checkpoint block** whose header
