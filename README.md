@@ -494,6 +494,45 @@ from the bundled bootnode in [`Data/static-nodes.json`](src/Nethermind/Nethermin
    Confirm the seed was loaded — the startup log must contain `Loaded 1 static nodes from file`
    and `net_peerCount` should become `> 0` within ~30s.
 
+**I already pass the correct bootnode with `--Network.StaticPeers …@167.86.100.150:30304`, but the node STILL stays at `0` peers — and I am reusing an existing `--datadir` that a previous client wrote.**
+This is almost always a **contaminated / incompatible database**, not a network problem. If that
+`--datadir` was ever written by a *different* client — a stock NethermindEth `1.39.x` binary, an
+Ethereum-mainnet run, or an older/other chain spec — its database is bound to a **different
+genesis / networkId** than UnipolyChain (`47382916`). Your node then advertises that foreign
+chain in the devp2p `eth` handshake, our bootnode and validators reject it, and you sit at `0`
+peers **even though you are dialing the correct bootnode**. You cannot mix one datadir across two
+chains.
+
+**Fix — point the node at a brand-new, empty datadir** (do not reuse the old one) and use this
+repo's bundled config, not a hand-made one:
+
+```bash
+# a fresh, empty data directory — NOT the old /root/data/unipoly_data
+./nethermind --config mainnet \
+  --datadir "$HOME/unpchain_fresh" \
+  --Init.IsMining false --Init.EnableUnsecuredDevWallet false \
+  --Network.StaticPeers "enode://1e9863365795ea0cb16f4c524694a28e37a9b35a411965bb152a62c63735e6531af7cca65e3c8faeb6049a94535ba9516df2616411142e0d5143de001f075705@167.86.100.150:30304" \
+  --JsonRpc.Enabled true --JsonRpc.Host 127.0.0.1 --JsonRpc.Port 8545 \
+  --JsonRpc.EnabledModules "Eth,Net,Web3,Clique,Health"
+```
+
+A clean full sync is cheap — UnipolyChain blocks are near-empty, so a fresh node reaches the
+chain head in only a few minutes; after that the datadir persists and no resync is ever needed.
+**Self-check that your node is really on UnipolyChain** (all three must match exactly, or your
+config/datadir is the problem — not the network):
+
+```bash
+curl -s -X POST http://127.0.0.1:8545 -H 'Content-Type: application/json' --data '{"jsonrpc":"2.0","method":"net_version","params":[],"id":1}'   # -> "47382916"
+curl -s -X POST http://127.0.0.1:8545 -H 'Content-Type: application/json' --data '{"jsonrpc":"2.0","method":"eth_chainId","params":[],"id":1}'    # -> "0x2d30184"
+curl -s -X POST http://127.0.0.1:8545 -H 'Content-Type: application/json' --data '{"jsonrpc":"2.0","method":"eth_getBlockByNumber","params":["0x0",false],"id":1}' | grep -o '"hash":"0x[0-9a-f]*"' | head -1
+# genesis hash must be 0x01e8472c2bafaf846e04f682714f24eec647d2b8d61097569a4cdfe3ea87abd8
+```
+
+> Tip: if your run command uses a **custom** `--config /path/unipoly-mainnet.json` that lives
+> *inside* the old datadir, drop it and use the repo's `--config mainnet` instead — that bundles
+> the correct chain spec (`chainspec/foundation.json`, genesis / networkId `47382916`,
+> `maximumExtraDataSize: 0x400`) and the public bootnode, so there is nothing left to misconfigure.
+
 **My node is stuck at a height just below a multiple of 30000 (e.g. `2009999`) — the next block never imports (`InvalidExtraData` / "extra data too long").**
 This is the single most common issue and it has a one‑line fix. Every `epoch` block (every
 30000 blocks: 30000, 60000, … `2010000`, …) is a **Clique checkpoint block** whose header
